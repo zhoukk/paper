@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta http-equiv="Content-Language" content="zh-CN">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="renderer" content="webkit">
+    <meta name="generator" content="paper">
+
+    <meta name="author" content="">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <title>PAPER</title>
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdn.bootcss.com/highlight.js/8.9.1/styles/github.min.css" rel="stylesheet">
+    <link href="//cdn.bootcss.com/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body style="background-color: #eee; font-size: 18px;">
+
+    <div class="modal fade" id="dialog_login" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">登录PAPER</h3>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label class="sr-only" for="username">用户名</label>
+                            <div class="col-sm-10 col-sm-offset-1">
+                                <input type="email" class="form-control" id="username" placeholder="github帐号"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="password">密码</label>
+                            <div class="col-sm-10 col-sm-offset-1">
+                                <input type="password" class="form-control" id="password" placeholder="github密码"></div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-10 col-sm-offset-1">
+                                <div id="err_login"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-sm-6 col-sm-offset-3">
+                        <button type="button" class="btn btn-primary btn-block" id="btn_login">登录</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="dialog_preview" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div id="preview"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="dialog_publish" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">发布PAPER</h3>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="paper_title" class="col-sm-2 control-label">标题</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="paper_title" placeholder="文章标题 <title></title>"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="paper_datetime" class="col-sm-2 control-label">时间</label>
+                            <div class="col-sm-10">
+                                <div class="input-group date" id="datetime_picker">
+                                    <input type="text" class="form-control" id="paper_datetime" placeholder="文章发布时间">
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-time"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="paper_keywords" class="col-sm-2 control-label">关键字</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="paper_keywords" placeholder="文章关键字 <meta name='keywords' content='keywords'>"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="paper_description" class="col-sm-2 control-label">描述</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" id="paper_description" rows="3" placeholder="文章描述 <meta name='description' content='description'>" style="resize: none; word-wrap: break-word;"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                             <label for="paper_mode" class="col-sm-2 control-label">选项</label>
+                            <div class="col-sm-10">
+                                <div class="checkbox" title="暂存为草稿，不公开发布">
+                                    <label>
+                                        <input type="checkbox" id="paper_mode">发布为草稿
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div id="err_publish"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-sm-offset-4 col-sm-4">
+                        <button type="button" class="btn btn-primary btn-block" id="btn_publish">发布</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="dialog_setting" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">设置PAPER</h3>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="index_header" class="col-sm-2 control-label">简介</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="index_header" placeholder="profile"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="index_title" class="col-sm-2 control-label">标题</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="index_title" placeholder="<title></title>
+                            ">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="index_author" class="col-sm-2 control-label">作者</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="index_author" placeholder="<meta name='author' content=''>"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="index_keywords" class="col-sm-2 control-label">关键字</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="index_keywords" placeholder="<meta name='keywords' content=''>"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="index_description" class="col-sm-2 control-label">描述</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" id="index_description" rows="3" placeholder="<meta name='description' content=''>" style="resize: none; word-wrap: break-word;"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="index_disqus" class="col-sm-2 control-label">评论</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="index_disqus" placeholder="disqus account name"></div>
+                    </div>
+                    <div class="form-group">
+                        <div id="err_setting"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="col-sm-offset-4 col-sm-4">
+                    <button type="button" class="btn btn-primary btn-block" id="btn_setting">设置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="modal fade" id="dialog_list" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="form-group has-feedback">
+                    <input type="text" class="form-control" id="paper_list_search" placeholder="查找">
+                    <span class="glyphicon glyphicon-search form-control-feedback" aria-hidden="true"></span>
+                </div>
+                <div id="err_list"></div>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group" id="paper_list"></ul>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="modal fade" id="dialog_help" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div id="help"></div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="modal-dialog modal-lg">
+    <div class="modal-content" style="border: none;">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar_collapse" aria-expanded="false">
+                        <span class="sr-only">navbar toggle</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="https://github.com/zhoukk/paper" target="_blank" role="button">PAPER</a>
+                </div>
+                <div class="collapse navbar-collapse" id="navbar_collapse">
+                    <button type="button" class="btn btn-default navbar-btn" data-toggle="modal" data-target="#dialog_list">列表</button>
+                    <button type="button" class="btn btn-default navbar-btn" data-toggle="modal" data-target="#dialog_setting">设置</button>
+                    <button type="button" class="btn btn-default navbar-btn" data-toggle="modal" data-target="#dialog_publish">发布</button>
+                    <button type="button" class="btn btn-default navbar-btn" data-toggle="modal" data-target="#dialog_preview">预览</button>
+                    <button type="button" class="btn btn-default navbar-btn" data-toggle="modal" data-target="#dialog_help">帮助</button>
+                    <a href="#" class="navbar-text navbar-link navbar-right" id="login_name" style="font-size: 14px;"></a>
+                </div>
+            </div>
+        </nav>
+    </div>
+    </div>
+
+    <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-body">
+            <textarea id="editor" rows="8" placeholder="" style="outline: none; border: none; resize: none; width: 100%;"></textarea>
+        </div>
+    </div>
+    </div>
+
+    <script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="//cdn.bootcss.com/marked/0.3.5/marked.min.js"></script>
+    <script src="//cdn.bootcss.com/highlight.js/8.9.1/highlight.min.js"></script>
+    <script src="//cdn.bootcss.com/autosize.js/3.0.14/autosize.min.js"></script>
+    <script src="//cdn.bootcss.com/moment.js/2.10.6/moment.min.js"></script>
+    <script src="//cdn.bootcss.com/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="github.js"></script>
+    <script src="paper.min.js"></script>
+</body>
+</html>
