@@ -112,16 +112,21 @@ function edit_paper(path) {
 }
 
 function delete_paper(i, path) {
-    $("#paper_"+i+" a").removeAttr("href")
-    deletefile(path+".html", function(err1) {
-        update_index(function(err2) {
-            if (err1) {
-                return show_error("err_list", err1)
-            }
-            if (err2) {
-                return show_error("err_list", err2)
-            }
-            $("#paper_"+i).remove()
+    $("#paper_" + i + " a").removeAttr("href")
+    deletefile(path + ".html", function(err1) {
+        deletefile(path + ".meta", function(err2) {
+            update_index(function(err3) {
+                if (err1) {
+                    return show_error("err_list", err1)
+                }
+                if (err2) {
+                    return show_error("err_list", err2)
+                }
+                if (err3) {
+                    return show_error("err_list", err3)
+                }
+                $("#paper_"+i).remove()
+            })
         })
     })
 }
@@ -132,8 +137,12 @@ $('#dialog_preview').on('show.bs.modal',function() {
 
 $('#dialog_publish').on('show.bs.modal',function() {
     $('#paper_datetime').val(moment(new Date()).format("YYYY-MM-DD HH:mm:ss"))
-    $('#err_publish').html('')
+    $('#err_publish').empty()
     $('#paper_mode').removeAttr('checked')
+})
+
+$('#dialog_setting').on('show.bs.modal',function() {
+    $('#err_setting').empty()
 })
 
 function append_list(i, name, path) {
@@ -142,6 +151,7 @@ function append_list(i, name, path) {
 
 $('#dialog_list').on('show.bs.modal',function() {
     $("#paper_list").empty()
+    $("#err_list").empty()
     $("#paper_list_search").val('')
     paper_list = []
     readdir(function(err, data) {
