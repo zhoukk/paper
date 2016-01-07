@@ -34,7 +34,7 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<p class="text-center"><a href="/rss.xml">RSS</a> | <a href="/atom.xml">ATOM</a></p>
+					<p class="text-center"><a href="/rss.xml">RSS</a> | <a href="/atom.xml">ATOM</a> | <a href="http://zhoukk.com/paper/" target="_blank">PAPER</a></p>
 				</div>
 			</div>
 		</div>

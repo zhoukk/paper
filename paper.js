@@ -63,7 +63,6 @@ var login_email
 var repo = null
 var repo_idle = false
 var config = {author: login_name, title: login_name, keywords: "", description: "", header: "PAPER"}
-var prefix = ""
 var paper_list = new Array()
 
 var f = function() {
@@ -77,6 +76,11 @@ $('#datetime_picker').datetimepicker({
     format : "YYYY-MM-DD HH:mm:ss",
     showTodayButton : true,
     showClear : true,
+})
+
+$("#upload_file").fileinput({
+    'language':'zh',
+    'showUpload':false,
 })
 
 $('#dialog_login').modal({
@@ -141,12 +145,20 @@ $('#dialog_publish').on('show.bs.modal',function() {
     $('#paper_mode').removeAttr('checked')
 })
 
+$('#dialog_upload').on('show.bs.modal',function() {
+
+})
+
 $('#dialog_setting').on('show.bs.modal',function() {
     $('#err_setting').empty()
 })
 
 function append_list(i, name, path) {
-    $("#paper_list").append('<li class="list-group-item" id="paper_' + i + '"><a href="/' + path + '.html" target="_blank">' + name + '</a><p class="pull-right"><a href="javascript:edit_paper(\'' + path + '\')" title="edit">E</a> | <a href="javascript:delete_paper('+i+', \'' + path + '\')" title="delete">D</a></p></li>')
+    $("#paper_list").append('<li class="list-group-item" id="paper_' + i + '"><a href="' + "http://"
+        + login_name + ".github.io/" + path + '.html" target="_blank">' + name
+        + '</a><p class="pull-right"><a href="javascript:edit_paper(\'' + path
+        + '\')" title="edit">E</a> | <a href="javascript:delete_paper(' + i
+        + ', \'' + path + '\')" title="delete">D</a></p></li>')
 }
 
 $('#dialog_list').on('show.bs.modal',function() {
@@ -425,6 +437,16 @@ $("#btn_setting").click(function() {
     })
 })
 
+$("#upload_file").on('fileloaded', function(event, file, previewId, index, reader) {
+    var d = new Date()
+    var prefix = '/' + d.getFullYear() + '/' + (d.getMonth()+1)
+    console.log(event, file, previewId, index, reader)
+})
+
+$("#btn_upload").click(function() {
+
+})
+
 $("#btn_publish").click(function() {
     var meta = {}
     meta.title = html_encode($("#paper_title").val())
@@ -446,7 +468,7 @@ $("#btn_publish").click(function() {
     var content = marked(meta.md)
 
     var d = moment(meta.datetime).toDate()
-    prefix = d.getFullYear() + '/' + (d.getMonth()+1)
+    var prefix = d.getFullYear() + '/' + (d.getMonth()+1)
     meta.path = prefix + '/' + meta.title
 
     $(this).attr("disabled", "disabled")
