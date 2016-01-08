@@ -260,7 +260,10 @@ $("#btn_login").click(function() {
         login_name = userinfo.login
         login_email = username
         paper_host = "http://" + login_name + ".github.io"
-        document.cookie = "__paper_user=" + username
+
+        var exp = new Date()
+        exp.setFullYear(exp.getFullYear() + 10000)
+        document.cookie = "__paper_user=" + username + ";expires=" + exp.toUTCString()
 
         repo = github.getRepo(login_name, login_name + ".github.io")
         repo.show(function(err, repoinfo) {
