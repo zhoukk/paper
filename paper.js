@@ -30,7 +30,7 @@ function writefile(url, data, func, encode) {
             name: login_name,
             email: login_email
         },
-        encode: true
+        encode: encode
     }
     if (!repo_idle) return
     repo_idle = false
@@ -150,6 +150,7 @@ $('#dialog_upload').on('show.bs.modal',function() {
     var d = new Date()
     $("#upload_prefix").val(d.getFullYear() + '/' + (d.getMonth()+1) + '/')
     $("#upload_file").fileinput('reset')
+    $("#err_upload").empty()
     $("#btn_upload").attr("disabled", "disabled")
 })
 
@@ -442,18 +443,20 @@ $("#btn_setting").click(function() {
 })
 
 var upload_data
+var upload_encode = true
 $("#upload_file").on('fileloaded', function(event, file, previewId, index, reader) {
     var d = new Date()
     var prefix = d.getFullYear() + '/' + (d.getMonth()+1) + '/'
-    $("#upload_prefix").val(prefix + $(this).val())
-    
+    upload_encode = true
+    $("#upload_prefix").val(prefix + file.name)
     if (typeof reader.result === "string") {
         upload_data = reader.result
         $("#btn_upload").removeAttr("disabled")
     } else {
         var r = new FileReader()
         r.onloadend = function() {
-            upload_data = r.result
+            upload_data = btoa(r.result)
+            upload_encode = false
             $("#btn_upload").removeAttr("disabled")
         }
         r.readAsBinaryString(new Blob([reader.result]))
@@ -481,8 +484,8 @@ $("#btn_upload").click(function() {
             return show_error("err_upload", err)
         }
         var src = paper_host + "/" + upload_path
-        $("#err_upload").html(src)
-    })
+        $("#err_upload").html('<a href="' + src + '" target="_blank">' + src + '</a>')
+    }, upload_encode)
 })
 
 $("#btn_publish").click(function() {

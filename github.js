@@ -3,20 +3,17 @@
  *
  * @copyright (c) 2013 Michael Aufreiter, Development Seed
  *            Github.js is freely distributable.
- *
+ *de
  * @license   Licensed under BSD-3-Clause-Clear
  *
  *            For all details and documentation:
  *            http://substance.io/michael/github
  */
-
 (function (root, factory) {
-   // UMD boilerplate from https://github.com/umdjs/umd/blob/master/returnExportsGlobal.js
    'use strict';
 
    /* istanbul ignore next */
    if (typeof define === 'function' && define.amd) {
-      // AMD. Register as an anonymous module.
       define(['xmlhttprequest', 'js-base64'], function (XMLHttpRequest, b64encode) {
          return (root.Github = factory(XMLHttpRequest.XMLHttpRequest, b64encode.Base64.encode));
       });
@@ -27,9 +24,8 @@
          module.exports = factory(require('xmlhttprequest').XMLHttpRequest, require('js-base64').Base64.encode);
       }
    } else {
-      // Browser globals
       var b64encode = function(str) {
-         return root.btoa(str.replace(/%([0-9A-F]{2})/g, function(match, p1) {
+         return root.btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
             return String.fromCharCode('0x' + p1);
          }));
       };
@@ -63,7 +59,8 @@
                }
             }
 
-            return url + (typeof window !== 'undefined' ? '&' + new Date().getTime() : '');
+            return url.replace(/(&timestamp=\d+)/, '') +
+               (typeof window !== 'undefined' ? '&timestamp=' + new Date().getTime() : '');
          }
 
          var xhr = new XMLHttpRequest();
@@ -122,16 +119,15 @@
 
                results.push.apply(results, res);
 
-               var links = (xhr.getResponseHeader('link') || '').split(/\s*,\s*/g);
-               var next = null;
-
-               links.forEach(function(link) {
-                  next = /rel="next"/.test(link) ? link : next;
-               });
-
-               if (next) {
-                  next = (/<(.*)>/.exec(next) || [])[1];
-               }
+               var next = (xhr.getResponseHeader('link') || '')
+                  .split(';')
+                  .filter(function(part) {
+                     return part.search(/rel="next"/) !== -1;
+                  })
+                  .map(function(part) {
+                     return part.match(/<(.+?)>/)[1];
+                  })
+                  .pop();
 
                if (!next) {
                   cb(err, results);
@@ -320,13 +316,6 @@
          var currentTree = {
             branch: null,
             sha: null
-         };
-
-         // Delete a repo
-         // --------
-
-         this.deleteRepo = function(cb) {
-            _request('DELETE', repoPath, options, cb);
          };
 
          // Uses the cache if branch has not been changed
@@ -520,6 +509,13 @@
                });
          };
 
+         // Get the statuses for a particular SHA
+         // -------
+
+         this.getStatuses = function(sha, cb) {
+            _request('GET', repoPath + '/statuses/' + sha, null, cb);
+         };
+
          // Retrieve the tree a commit points to
          // -------
 
@@ -672,6 +668,13 @@
 
          this.fork = function(cb) {
             _request('POST', repoPath + '/forks', null, cb);
+         };
+
+         // List forks
+         // --------
+
+         this.listForks = function(cb) {
+            _request('GET', repoPath + '/forks', null, cb);
          };
 
          // Branch repository
