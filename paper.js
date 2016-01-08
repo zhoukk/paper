@@ -20,7 +20,7 @@ function readfile(url, func) {
     })
 }
 
-function writefile(url, data, func) {
+function writefile(url, data, func, encode) {
     var options = {
         author: {
             name: login_name,
@@ -64,6 +64,7 @@ var repo = null
 var repo_idle = false
 var config = {author: login_name, title: login_name, keywords: "", description: "", header: "PAPER"}
 var paper_list = new Array()
+var paper_host
 
 var f = function() {
     $(this).parent().removeClass('has-error')
@@ -146,7 +147,10 @@ $('#dialog_publish').on('show.bs.modal',function() {
 })
 
 $('#dialog_upload').on('show.bs.modal',function() {
-
+    var d = new Date()
+    $("#upload_prefix").val(d.getFullYear() + '/' + (d.getMonth()+1) + '/')
+    $("#upload_file").fileinput('reset')
+    $("#btn_upload").attr("disabled", "disabled")
 })
 
 $('#dialog_setting').on('show.bs.modal',function() {
@@ -154,8 +158,8 @@ $('#dialog_setting').on('show.bs.modal',function() {
 })
 
 function append_list(i, name, path) {
-    $("#paper_list").append('<li class="list-group-item" id="paper_' + i + '"><a href="' + "http://"
-        + login_name + ".github.io/" + path + '.html" target="_blank">' + name
+    $("#paper_list").append('<li class="list-group-item" id="paper_' + i + '"><a href="' + paper_host + "/"
+        + path + '.html" target="_blank">' + name
         + '</a><p class="pull-right"><a href="javascript:edit_paper(\'' + path
         + '\')" title="edit">E</a> | <a href="javascript:delete_paper(' + i
         + ', \'' + path + '\')" title="delete">D</a></p></li>')
@@ -234,7 +238,7 @@ $("#btn_login").click(function() {
         $("#index_disqus").val(config.disqus)
         autosize.update($('textarea'))
 
-        $("#login_name").text(login_name).attr("href", "http://" + login_name + ".github.io").attr("target", "_blank")
+        $("#login_name").text(login_name).attr("href", paper_host).attr("target", "_blank")
         $("#btn_login").removeAttr("disabled")
         $('#dialog_login').modal('hide')
         repo_idle = true
@@ -254,6 +258,7 @@ $("#btn_login").click(function() {
         }
         login_name = userinfo.login
         login_email = username
+        paper_host = "http://" + login_name + ".github.io"
         document.cookie = "__paper_user=" + username
 
         repo = github.getRepo(login_name, login_name + ".github.io")
@@ -282,7 +287,6 @@ $("#btn_login").click(function() {
 })
 
 function create_rss_atom(array, func) {
-    var url = "http://" + login_name + ".github.io"
     var d = new Date()
 
     var atom = '<?xml version="1.0" encoding="UTF-8"?>'
@@ -290,9 +294,9 @@ function create_rss_atom(array, func) {
     atom += '<title>'
     atom += config.title
     atom += '</title><id>'
-    atom += url
+    atom += paper_host
     atom += '</id><link rel="self" href="'
-    atom += url + '/atom.xml"></link><updated>'
+    atom += paper_host + '/atom.xml"></link><updated>'
     atom += d.toUTCString()
     atom += '</updated>'
 
@@ -300,7 +304,7 @@ function create_rss_atom(array, func) {
     rss += '<rss version="2.0"><channel><title>'
     rss += config.title
     rss += '</title><link>'
-    rss += url
+    rss += paper_host
     rss += '</link><description>'
     rss += config.description
     rss += '</description><pubDate>'
@@ -309,7 +313,7 @@ function create_rss_atom(array, func) {
 
     $(array).each(function(i, v) {
         d = moment(v.datetime).toDate()
-        url = "http://" + login_name + ".github.io/" + v.path + ".html"
+        var url = paper_host + "/" + v.path + ".html"
 
         atom += '<entry><title>'
         atom += v.title
@@ -437,14 +441,48 @@ $("#btn_setting").click(function() {
     })
 })
 
+var upload_data
 $("#upload_file").on('fileloaded', function(event, file, previewId, index, reader) {
     var d = new Date()
-    var prefix = '/' + d.getFullYear() + '/' + (d.getMonth()+1)
-    console.log(event, file, previewId, index, reader)
+    var prefix = d.getFullYear() + '/' + (d.getMonth()+1) + '/'
+    $("#upload_prefix").val(prefix + $(this).val())
+    
+    if (typeof reader.result === "string") {
+        upload_data = reader.result
+        $("#btn_upload").removeAttr("disabled")
+    } else {
+        var r = new FileReader()
+        r.onloadend = function() {
+            upload_data = r.result
+            $("#btn_upload").removeAttr("disabled")
+        }
+        r.readAsBinaryString(new Blob([reader.result]))
+    }
+})
+
+$("#upload_file").on('fileclear', function() {
+    var d = new Date()
+    $("#upload_prefix").val(d.getFullYear() + '/' + (d.getMonth()+1) + '/')
+    $("#err_upload").empty()
+    $("#btn_upload").attr("disabled", "disabled")
+})
+
+$("#upload_file").on('filebatchselected', function() {
+    $("#err_upload").empty()
 })
 
 $("#btn_upload").click(function() {
-
+    $("#err_upload").empty()
+    $(this).attr("disabled", "disabled")
+    var upload_path = $("#upload_prefix").val()
+    writefile(upload_path, upload_data, function(err) {
+        $("#btn_upload").removeAttr("disabled")
+        if (err) {
+            return show_error("err_upload", err)
+        }
+        var src = paper_host + "/" + upload_path
+        $("#err_upload").html(src)
+    })
 })
 
 $("#btn_publish").click(function() {
