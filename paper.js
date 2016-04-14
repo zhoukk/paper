@@ -34,7 +34,7 @@ function writefile(url, data, func, encode) {
     }
     if (!repo_idle) return
     repo_idle = false
-    repo.write('master', url, data, ".", options, function(err) {
+    repo.write('master', url, data, '.', options, function(err) {
         repo_idle = true
         func(err)
     })
@@ -78,28 +78,29 @@ function readdir(func) {
     })
 }
 
-var login_name = "PAPER"
+var login_name = 'PAPER'
 var login_email
 var repo = null
 var repo_idle = false
-var config = {author: login_name, title: login_name, keywords: "", description: "", header: "PAPER"}
+var config = {author: login_name, title: login_name, keywords: '', description: '', header: 'PAPER'}
 var paper_list = new Array()
 var paper_host
 
 var f = function() {
     $(this).parent().removeClass('has-error')
 }
-$("#username").focus(f)
-$("#password").focus(f)
-$("#paper_title").focus(f)
+$('#username').focus(f)
+$('#password').focus(f)
+$('#paper_url').focus(f)
+$('#paper_title').focus(f)
 
 $('#datetime_picker').datetimepicker({
-    format : "YYYY-MM-DD HH:mm:ss",
+    format : 'YYYY-MM-DD HH:mm:ss',
     showTodayButton : true,
     showClear : true,
 })
 
-$("#upload_file").fileinput({
+$('#upload_file').fileinput({
     'language':'zh',
     'showUpload':false,
 })
@@ -112,46 +113,47 @@ $('#dialog_login').modal({
 */
 
 var c = document.cookie
-if (c && c != "") {
-    $("#username").val(c.split("=")[1].split(";")[0])
+if (c && c != '') {
+    $('#username').val(c.split('=')[1].split(';')[0])
 }
 
 function show_error(id, err) {
     console.log(err)
-    $("#" + id).html('<div class="alert alert-danger" role="alert">' + err.error + ' ' + err.request.statusText + '</div>')
+    $('#' + id).html('<div class="alert alert-danger" role="alert">' + err.error + ' ' + err.request.statusText + '</div>')
 }
 
 function edit_paper(path) {
-    readfile(path+".meta", function(err, data) {
+    readfile(path+'.meta', function(err, data) {
         if (err) {
-            return show_error("err_list", err)
+            return show_error('err_list', err)
         }
         var meta = jQuery.parseJSON(data)
-        $("#editor").val(meta.md)
-        $("#paper_title").val(meta.title)
-        $("#paper_keywords").val(meta.keywords)
-        $("#paper_description").val(meta.description)
+        $('#editor').val(meta.md)
+        $('#paper_title').val(meta.title)
+        $('#paper_url').val(meta.url)
+        $('#paper_keywords').val(meta.keywords)
+        $('#paper_description').val(meta.description)
         autosize.update($('textarea'))
 
-        $("#dialog_list").modal('hide')
+        $('#dialog_list').modal('hide')
     })
 }
 
 function delete_paper(i, path) {
-    $("#paper_" + i + " a").removeAttr("href")
-    deletefile(path + ".html", function(err1) {
-        deletefile(path + ".meta", function(err2) {
+    $('#paper_' + i + ' a').removeAttr('href')
+    deletefile(path + '.html', function(err1) {
+        deletefile(path + '.meta', function(err2) {
             update_index(function(err3) {
                 if (err1) {
-                    return show_error("err_list", err1)
+                    return show_error('err_list', err1)
                 }
                 if (err2) {
-                    return show_error("err_list", err2)
+                    return show_error('err_list', err2)
                 }
                 if (err3) {
-                    return show_error("err_list", err3)
+                    return show_error('err_list', err3)
                 }
-                $("#paper_"+i).remove()
+                $('#paper_'+i).remove()
             })
         })
     })
@@ -161,18 +163,28 @@ $('#dialog_preview').on('show.bs.modal',function() {
     preview.html(marked(editor.val()))
 })
 
-$('#dialog_publish').on('show.bs.modal',function() {
-    $('#paper_datetime').val(moment(new Date()).format("YYYY-MM-DD HH:mm:ss"))
+$('#dialog_publish').on('shown.bs.modal',function() {
+    var d = new Date()
+    $('#paper_datetime').val(moment(d).format('YYYY-MM-DD HH:mm:ss'))
+    $('#paper_url').val(moment(d).format('YYYY/MM/'))
     $('#err_publish').empty()
     $('#paper_mode').removeAttr('checked')
+    var data = editor.val()
+    if (data != '') {
+        data = data.substring(0, data.indexOf('\n'))
+        data = data.replace(/^#+|^\s+/, '')
+        $('#paper_title').val(data)
+    }
+    $('#paper_url').focus()
 })
+
 
 $('#dialog_upload').on('show.bs.modal',function() {
     var d = new Date()
-    $("#upload_prefix").val(d.getFullYear() + '/' + (d.getMonth()+1) + '/')
-    $("#upload_file").fileinput('reset')
-    $("#err_upload").empty()
-    $("#btn_upload").attr("disabled", "disabled")
+    $('#upload_prefix').val(d.getFullYear() + '/' + (d.getMonth()+1) + '/')
+    $('#upload_file').fileinput('reset')
+    $('#err_upload').empty()
+    $('#btn_upload').attr('disabled', 'disabled')
 })
 
 $('#dialog_setting').on('show.bs.modal',function() {
@@ -180,27 +192,27 @@ $('#dialog_setting').on('show.bs.modal',function() {
 })
 
 function append_list(i, name, path) {
-    $("#paper_list").append('<li class="list-group-item" id="paper_' + i + '"><a href="' + paper_host + "/"
+    $('#paper_list').append('<li class="list-group-item" id="paper_' + i + '"><a href="' + paper_host + '/'
         + path + '.html" target="_blank">' + name
-        + '</a><p class="pull-right"><a href="javascript:edit_paper(\'' + path
-        + '\')" title="edit">E</a> | <a href="javascript:delete_paper(' + i
-        + ', \'' + path + '\')" title="delete">D</a></p></li>')
+        + '</a><p class="pull-right"><a href="javascript:edit_paper(\"' + path
+        + '\")" title="edit">E</a> | <a href="javascript:delete_paper(' + i
+        + ', \"' + path + '\")" title="delete">D</a></p></li>')
 }
 
 $('#dialog_list').on('show.bs.modal',function() {
-    $("#paper_list").empty()
-    $("#err_list").empty()
-    $("#paper_list_search").val('')
+    $('#paper_list').empty()
+    $('#err_list').empty()
+    $('#paper_list_search').val('')
     paper_list = []
     readdir(function(err, data) {
         if (err) {
-            return show_error("err_list", err)
+            return show_error('err_list', err)
         }
         $(data).each(function(i, v) {
             if (v.type == 'tree') {
                 return true
             }
-            if (v.path.substr(-5) != ".meta") {
+            if (v.path.substr(-5) != '.meta') {
                 return true
             }
             var path = v.path.substr(0, v.path.length - 5)
@@ -212,14 +224,14 @@ $('#dialog_list').on('show.bs.modal',function() {
 })
 
 $('#dialog_help').on('show.bs.modal',function() {
-    $.get('README.md', function(data) {
+    $.get('/README.md', function(data) {
         $('#help').html(marked(data))
     })
 })
 
-$("#paper_list_search").keyup(function() {
+$('#paper_list_search').keyup(function() {
     var key = $(this).val()
-    $("#paper_list").empty()
+    $('#paper_list').empty()
     $(paper_list).each(function(i, v) {
         if (v.name.toLowerCase().indexOf(key.toLowerCase()) != -1) {
             append_list(i, v.name, v.path)
@@ -227,18 +239,18 @@ $("#paper_list_search").keyup(function() {
     })
 })
 
-$("#btn_login").click(function() {
-    var username = $("#username").val()
-    var password = $("#password").val()
+$('#btn_login').click(function() {
+    var username = $('#username').val()
+    var password = $('#password').val()
 
     var next = true
-    if (username == "") {
+    if (username == '') {
         next = false
-        $("#username").parent().addClass("has-error")
+        $('#username').parent().addClass('has-error')
     }
-    if (password == "") {
+    if (password == '') {
         next = false
-        $("#password").parent().addClass("has-error")
+        $('#password').parent().addClass('has-error')
     }
 
     if (next == false) {
@@ -248,60 +260,62 @@ $("#btn_login").click(function() {
     var github = new Github({
         username: username,
         password: password,
-        auth: "basic"
+        auth: 'basic'
     })
 
     var f = function(show_setting) {
-        $("#index_title").val(html_decode(config.title))
-        $("#index_author").val(html_decode(config.author))
-        $("#index_keywords").val(html_decode(config.keywords))
-        $("#index_description").val(html_decode(config.description))
-        $("#index_header").val(config.header)
-        $("#index_disqus").val(config.disqus)
+        $('#index_title').val(html_decode(config.title))
+        $('#index_author').val(html_decode(config.author))
+        $('#index_keywords').val(html_decode(config.keywords))
+        $('#index_description').val(html_decode(config.description))
+        $('#index_header').val(config.header)
+        $('#index_disqus').val(config.disqus)
         autosize.update($('textarea'))
 
-        $("#login_name").text(login_name).attr("href", paper_host).attr("target", "_blank")
-        $("#btn_login").removeAttr("disabled")
+        $('#login_name').text(login_name).attr('href', paper_host).attr('target', '_blank')
+        $('#btn_login').removeAttr('disabled')
         $('#dialog_login').modal('hide')
         repo_idle = true
         editor.focus()
         if (show_setting) {
-            $("#dialog_setting").modal('show')
+            $('#dialog_setting').modal('show')
         }
     }
 
-    $(this).attr("disabled", "disabled")
+    $(this).attr('disabled', 'disabled')
 
     var user = github.getUser()
     user.show(null, function(err, userinfo) {
         if (err != null) {
-            $("#btn_login").removeAttr("disabled")
-            return show_error("err_login", err)
+            $('#btn_login').removeAttr('disabled')
+            return show_error('err_login', err)
         }
         login_name = userinfo.login
         login_email = username
-        paper_host = "http://" + login_name + ".github.io"
+        paper_host = 'http://' + login_name + '.github.io'
 
         var exp = new Date()
         exp.setFullYear(exp.getFullYear() + 10000)
-        document.cookie = "__paper_user=" + username + ";expires=" + exp.toUTCString()
+        document.cookie = '__paper_user=' + username + ';expires=' + exp.toUTCString()
 
-        repo = github.getRepo(login_name, login_name + ".github.io")
+        repo = github.getRepo(login_name, login_name + '.github.io')
         repo.show(function(err, repoinfo) {
             if (err) {
-                user.createRepo({"name": login_name + ".github.io"}, function(err, res) {
+                user.createRepo({'name': login_name + '.github.io'}, function(err, res) {
                     if (err != null) {
-                        $("#btn_login").removeAttr("disabled")
-                        return show_error("err_login", err)
+                        $('#btn_login').removeAttr('disabled')
+                        return show_error('err_login', err)
                     }
                     f(true)
                 })
             } else {
                 repo_idle = true
-                readfile('paper.json', function(err, data) {
+                readfile('index.html', function(err, data) {
                     var show_setting = true
                     if (err == null) {
-                        config = jQuery.parseJSON(data)
+                        var a = data.indexOf('{')
+                        var b = data.indexOf('-->')
+                        config = jQuery.parseJSON(data.substring(a, b))
                         show_setting = false
                     }
                     f(show_setting)
@@ -312,148 +326,132 @@ $("#btn_login").click(function() {
 })
 
 
-function create_archive(data, item) {
-    data = data.replace(/<ol>/, '<ol>\n'+item)
-    writefile('archive.html', data, function(err) {
-        console.log("write ok")
-    })
-}
+$('#btn_setting').click(function() {
+    config.title = html_encode($('#index_title').val())
+    config.author = html_encode($('#index_author').val())
+    config.keywords = html_encode($('#index_keywords').val())
+    config.description = html_encode($('#index_description').val())
+    config.header = $('#index_header').val()
+    config.disqus = $('#index_disqus').val()
 
-function update_index(f, item) {
-    readfile('archive.html', function(err, data) {
-        if (err) {
-            $.get('/archive.html', function(data) {
-                create_archive(data, item)
-            })
-        } else {
-            create_archive(data, item)
-        }
-    })
-
-    $.get('index.tpl', function(data) {
-        f()
-        var body = ""
-/*
-        readdir(function(err, list) {
-            if (err != null) {
-                return f(err)
-            }
-            var array = new Array()
-            var ef = function() {
-                array.sort(function(a, b) {
-                    var da = moment(a.datetime).toDate()
-                    var db = moment(b.datetime).toDate()
-                    return da < db ? 1 : -1
-                })
-                $(array).each(function(i, v) {
-                    body = body + '<a href="/' + v.path + '.html" class="list-group-item">' + v.title + '</a>\n'
-                })
-                data = data.replace(/{{body}}/, body)
-                    .replace(/{{title}}/, config.title)
-                    .replace(/{{author}}/, config.author)
-                    .replace(/{{keywords}}/, config.keywords)
-                    .replace(/{{description}}/, config.description)
-                    .replace(/{{header}}/, config.header)
-                writefile('index.html', data, function(err) {
-                    if (err) {
-                        return f(err)
-                    }
-                })
-            }
-        })
- */   })
-}
-
-$("#btn_setting").click(function() {
-    config.title = html_encode($("#index_title").val())
-    config.author = html_encode($("#index_author").val())
-    config.keywords = html_encode($("#index_keywords").val())
-    config.description = html_encode($("#index_description").val())
-    config.header = $("#index_header").val()
-    config.disqus = $("#index_disqus").val()
-
-    $(this).attr("disabled", "disabled")
+    $(this).attr('disabled', 'disabled')
     writefile('paper.json', JSON.stringify(config), function(err) {
-        $("#btn_setting").removeAttr("disabled")
+        $('#btn_setting').removeAttr('disabled')
         if (err) {
-            return show_error("err_setting", err)
+            return show_error('err_setting', err)
         }
-        $("#dialog_setting").modal('hide')
+        $('#dialog_setting').modal('hide')
     })
 })
 
 var upload_data
 var upload_encode = true
-$("#upload_file").on('fileloaded', function(event, file, previewId, index, reader) {
+$('#upload_file').on('fileloaded', function(event, file, previewId, index, reader) {
     var d = new Date()
     var prefix = d.getFullYear() + '/' + (d.getMonth()+1) + '/'
     upload_encode = true
-    $("#upload_prefix").val(prefix + file.name)
-    if (typeof reader.result === "string") {
+    $('#upload_prefix').val(prefix + file.name)
+    if (typeof reader.result === 'string') {
         upload_data = reader.result
-        $("#btn_upload").removeAttr("disabled")
+        $('#btn_upload').removeAttr('disabled')
     } else {
         var r = new FileReader()
         r.onloadend = function() {
             upload_data = btoa(r.result)
             upload_encode = false
-            $("#btn_upload").removeAttr("disabled")
+            $('#btn_upload').removeAttr('disabled')
         }
         r.readAsBinaryString(new Blob([reader.result]))
     }
 })
 
-$("#upload_file").on('fileclear', function() {
+$('#upload_file').on('fileclear', function() {
     var d = new Date()
-    $("#upload_prefix").val(d.getFullYear() + '/' + (d.getMonth()+1) + '/')
-    $("#err_upload").empty()
-    $("#btn_upload").attr("disabled", "disabled")
+    $('#upload_prefix').val(d.getFullYear() + '/' + (d.getMonth()+1) + '/')
+    $('#err_upload').empty()
+    $('#btn_upload').attr('disabled', 'disabled')
 })
 
-$("#upload_file").on('filebatchselected', function() {
-    $("#err_upload").empty()
+$('#upload_file').on('filebatchselected', function() {
+    $('#err_upload').empty()
 })
 
-$("#btn_upload").click(function() {
-    $("#err_upload").empty()
-    $(this).attr("disabled", "disabled")
-    var upload_path = $("#upload_prefix").val()
+$('#btn_upload').click(function() {
+    $('#err_upload').empty()
+    $(this).attr('disabled', 'disabled')
+    var upload_path = $('#upload_prefix').val()
     writefile(upload_path, upload_data, function(err) {
-        $("#btn_upload").removeAttr("disabled")
+        $('#btn_upload').removeAttr('disabled')
         if (err) {
-            return show_error("err_upload", err)
+            return show_error('err_upload', err)
         }
-        var src = paper_host + "/" + upload_path
-        $("#err_upload").html('<a href="' + src + '" target="_blank">' + src + '</a>')
+        var src = paper_host + '/' + upload_path
+        $('#err_upload').html('<a href="' + src + '" target="_blank">' + src + '</a>')
     }, upload_encode)
 })
 
-$("#btn_publish").click(function() {
+function get_archive(f) {
+    readfile('archive.html', function(err, data) {
+        if (err) {
+            $.get('/archive.tpl', function(data) {
+                f(data)
+            })
+        } else {
+            f(data)
+        }
+    })
+}
+
+function update_index(f) {
+    $.get('/index.tpl', function(data) {
+        var item = '<a href="' + meta.url + '" class="list-group-item">' + meta.title + '</a>\n'
+
+        data = data.replace(/{{body}}/, item)
+        .replace(/{{title}}/, config.title)
+        .replace(/{{author}}/, config.author)
+        .replace(/{{keywords}}/, config.keywords)
+        .replace(/{{description}}/, config.description)
+        .replace(/{{header}}/, config.header)
+
+        data = '<!--' + JSON.stringify(config) + '-->\n' + data
+
+        writefile('index.html', data, function(err) {
+            f(err)
+        })
+    })
+}
+
+$('#btn_publish').click(function() {
     var meta = {}
-    meta.title = html_encode($("#paper_title").val())
-    meta.keywords = html_encode($("#paper_keywords").val())
-    meta.description = html_encode($("#paper_description").val())
-    meta.datetime = $("#paper_datetime").val()
+    meta.title = html_encode($('#paper_title').val())
+    meta.url = $('#paper_url').val()
+    meta.keywords = html_encode($('#paper_keywords').val())
+    meta.description = html_encode($('#paper_description').val())
+    meta.datetime = $('#paper_datetime').val()
     meta.md = editor.val()
 
-    if ($("#paper_mode").is(':checked')) {
+    if ($('#paper_mode').is(':checked')) {
         meta.mode = 'draft'
     } else {
         meta.mode = 'publish'
     }
 
-    if (meta.title == "") {
-        $("#paper_title").parent().addClass("has-error")
+    if (meta.url == '') {
+        $('#paper_url').parent().addClass('has-error')
         return
+    }
+    if (meta.title == '') {
+        $('#paper_title').parent().addClass('has-error')
+        return
+    }
+
+    if (meta.url.substr(-5) != '.html') {
+        meta.url = meta.url + '.html'
     }
     var content = marked(meta.md)
 
-    var d = moment(meta.datetime).toDate()
-    var prefix = d.getFullYear() + '/' + (d.getMonth()+1)
-    meta.path = prefix + '/' + meta.title
-
-    $(this).attr("disabled", "disabled")
-    $.get('paper.tpl', function(data) {
+    $(this).attr('disabled', 'disabled')
+    $.get('/paper.tpl', function(data) {
         data = data.replace(/{{body}}/, content)
         .replace(/{{title}}/, meta.title)
         .replace(/{{author}}/, config.author)
@@ -462,25 +460,50 @@ $("#btn_publish").click(function() {
         .replace(/{{description}}/, meta.description)
         .replace(/{{datetime}}/, meta.datetime)
 
-        data = "<!--\n" + JSON.stringify(meta) + "\n-->\n" + data
+        data = '<!--' + JSON.stringify(meta) + '-->\n' + data
 
-        writefile(meta.path + ".html", data, function(err) {
+        writefile(meta.url, data, function(err) {
+            $('#btn_publish').removeAttr('disabled')
             if (err) {
-                return show_error("err_write", err)
+                return show_error('err_write', err)
             }
-            update_index(function(err) {
-                $("#btn_publish").removeAttr("disabled")
-                if (err) {
-                    return show_error("err_publish", err)
-                }
-                $("#paper_title").val('')
-                $("#paper_keywords").val('')
-                $("#paper_description").val('')
-                $("#editor").val('')
-                $('#preview').html('')
-                $('#dialog_publish').modal('hide')
-                autosize.update($('textarea'))
-            }, '<li>' + meta.datetime + ' <a href="/' + meta.path + '.html">' + meta.title + '</a></li>')
+            $.get('/index.tpl', function(data) {
+                var item = '<a href="' + meta.url + '" class="list-group-item">' + meta.title + '</a>\n'
+
+                data = data.replace(/{{body}}/, item)
+                .replace(/{{title}}/, config.title)
+                .replace(/{{author}}/, config.author)
+                .replace(/{{keywords}}/, config.keywords)
+                .replace(/{{description}}/, config.description)
+                .replace(/{{header}}/, config.header)
+
+                data = '<!--' + JSON.stringify(config) + '-->\n' + data
+
+                writefile('index.html', data, function(err) {
+                    $('#btn_publish').removeAttr('disabled')
+                    if (err) {
+                        return show_error('err_write', err)
+                    }
+                    get_archive(function(data) {
+                        var item = '<li>' + meta.datetime + ' <a href="'
+                        + meta.url + '">' + meta.title + '</a></li>'
+                        data = data.replace(/<ol reversed>/, '<ol reversed>\n' + item)
+                        writefile('archive.html', data, function(err) {
+                            $('#btn_publish').removeAttr('disabled')
+                            if (err) {
+                                return show_error('err_publish', err)
+                            }
+                            $('#paper_title').val('')
+                            $('#paper_keywords').val('')
+                            $('#paper_description').val('')
+                            $('#editor').val('')
+                            $('#preview').html('')
+                            $('#dialog_publish').modal('hide')
+                            autosize.update($('textarea'))
+                        })
+                    })
+                })
+            })
         })
     })
 })

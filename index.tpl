@@ -28,7 +28,7 @@
 				<div class="modal-header">
 					<h3 class="modal-title text-center">{{header}}</h3>
 				</div>
-				<div class="modal-:%s/^M$//gbody">
+				<div class="modal-body">
 					<div class="list-group" style="font-size: 18px;">
 						{{body}}
 					</div>

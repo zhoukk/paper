@@ -12,15 +12,11 @@
 	<meta name="renderer" content="webkit">
 	<meta name="generator" content="paper">
 
-	<meta name="author" content="{{author}}">
-	<meta name="keywords" content="{{keywords}}">
-	<meta name="description" content="{{description}}">
-
-	<title>{{title}}</title>
+	<title>archive</title>
 
 	<link rel="icon" type="image/x-icon" href="/favicon.ico">
 </head>
-<ol>
+<ol reversed>
 </ol>
 <body>
 </body>
