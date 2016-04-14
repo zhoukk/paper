@@ -10,7 +10,7 @@ function html_encode(v) {
 function html_decode(v) {
     return $('<div/>').html(v).text()
 }
-
+/*
 function readfile(url, func) {
     if (!repo_idle) return
     repo_idle = false
@@ -37,6 +37,26 @@ function writefile(url, data, func, encode) {
     repo.write('master', url, data, ".", options, function(err) {
         repo_idle = true
         func(err)
+    })
+}
+*/
+
+function readfile(url, func) {
+    $.ajax({
+        url: '/build/' + url,
+        type: 'GET',
+        success: function(data) {
+            func(null, data)
+        },
+        error: function(err) {
+            func(err, null)
+        }
+    })
+}
+
+function writefile(url, data, func, encode) {
+    $.post('/build/' + url, {data:data}, function(rdata) {
+        func(null, rdata)
     })
 }
 
@@ -83,12 +103,13 @@ $("#upload_file").fileinput({
     'language':'zh',
     'showUpload':false,
 })
-
+/*
 $('#dialog_login').modal({
     backdrop: 'static',
     show: true,
     keyboard: false
 })
+*/
 
 var c = document.cookie
 if (c && c != "") {
@@ -290,83 +311,29 @@ $("#btn_login").click(function() {
     })
 })
 
-function create_rss_atom(array, func) {
-    var d = new Date()
 
-    var atom = '<?xml version="1.0" encoding="UTF-8"?>'
-    atom += '<feed xmlns="http://www.w3.org/2005/Atom">'
-    atom += '<title>'
-    atom += config.title
-    atom += '</title><id>'
-    atom += paper_host
-    atom += '</id><link rel="self" href="'
-    atom += paper_host + '/atom.xml"></link><updated>'
-    atom += d.toUTCString()
-    atom += '</updated>'
-
-    var rss = '<?xml version="1.0" encoding="UTF-8"?>'
-    rss += '<rss version="2.0"><channel><title>'
-    rss += config.title
-    rss += '</title><link>'
-    rss += paper_host
-    rss += '</link><description>'
-    rss += config.description
-    rss += '</description><pubDate>'
-    rss += d.toUTCString()
-    rss += '</pubDate>'
-
-    $(array).each(function(i, v) {
-        d = moment(v.datetime).toDate()
-        var url = paper_host + "/" + v.path + ".html"
-
-        atom += '<entry><title>'
-        atom += v.title
-        atom += '</title><id>'
-        atom += url
-        atom += '</id><link rel="self" href="'
-        atom += url
-        atom += '"></link><published>'
-        atom += d.toUTCString()
-        atom += '</published><updated>'
-        atom += d.toUTCString()
-        atom += '</updated><author><name>'
-        atom += config.author
-        atom += '</name></author><summary type="text">'
-        atom += v.description
-        atom += '</summary></entry>'
-
-        rss += '<item><title>'
-        rss += v.title
-        rss += '</title><link>'
-        rss += url
-        rss += '</link><description>'
-        rss += v.description
-        rss += '</description><pubDate>'
-        rss += d.toUTCString()
-        rss += '</pubDate></item>'
-    })
-
-    atom += '</feed>'
-
-    rss += '</channel></rss>'
-    writefile("rss.xml", rss, function(err1) {
-        writefile("atom.xml", atom, function(err2) {
-            if (err1) {
-                return func(err1)
-            }
-            if (err2) {
-                return func(err2)
-            }
-            func()
-        })
+function create_archive(data, item) {
+    data = data.replace(/<ol>/, '<ol>\n'+item)
+    writefile('archive.html', data, function(err) {
+        console.log("write ok")
     })
 }
 
+function update_index(f, item) {
+    readfile('archive.html', function(err, data) {
+        if (err) {
+            $.get('/archive.html', function(data) {
+                create_archive(data, item)
+            })
+        } else {
+            create_archive(data, item)
+        }
+    })
 
-function update_index(f) {
     $.get('index.tpl', function(data) {
+        f()
         var body = ""
-
+/*
         readdir(function(err, list) {
             if (err != null) {
                 return f(err)
@@ -391,40 +358,10 @@ function update_index(f) {
                     if (err) {
                         return f(err)
                     }
-                    create_rss_atom(array, f)
                 })
             }
-            var n = list.length
-            var i = 0
-            var sf = function() {
-                if (i == n ) {
-                    ef()
-                    return
-                }
-                var v = list[i]
-                if (v.type == "tree") {
-                    i++
-                    sf()
-                    return
-                }
-                var ext = v.path.substr(-5)
-                if (ext == '.meta') {
-                    readfile(v.path, function(err, meta) {
-                        var j = jQuery.parseJSON(meta)
-                        if (j.mode == "publish") {
-                            array.push(j)
-                        }
-                        i++
-                        sf()
-                    })
-                } else {
-                    i++
-                    sf()
-                }
-            }
-            sf()
         })
-    })
+ */   })
 }
 
 $("#btn_setting").click(function() {
@@ -525,14 +462,16 @@ $("#btn_publish").click(function() {
         .replace(/{{description}}/, meta.description)
         .replace(/{{datetime}}/, meta.datetime)
 
-        var f = function(err) {
-            update_index(function(err3) {
+        data = "<!--\n" + JSON.stringify(meta) + "\n-->\n" + data
+
+        writefile(meta.path + ".html", data, function(err) {
+            if (err) {
+                return show_error("err_write", err)
+            }
+            update_index(function(err) {
                 $("#btn_publish").removeAttr("disabled")
                 if (err) {
                     return show_error("err_publish", err)
-                }
-                if (err3) {
-                    return show_error("err_publish", err3)
                 }
                 $("#paper_title").val('')
                 $("#paper_keywords").val('')
@@ -541,20 +480,7 @@ $("#btn_publish").click(function() {
                 $('#preview').html('')
                 $('#dialog_publish').modal('hide')
                 autosize.update($('textarea'))
-            })
-        }
-
-        writefile(meta.path + ".meta", JSON.stringify(meta), function(err1) {
-            if (meta.mode == "publish") {
-                writefile(meta.path + ".html", data, function(err2) {
-                    if (err1) {
-                        return f(err1)
-                    }
-                    return f(err2)
-                })
-            } else {
-                f(err1)
-            }
+            }, '<li>' + meta.datetime + ' <a href="/' + meta.path + '.html">' + meta.title + '</a></li>')
         })
     })
 })
