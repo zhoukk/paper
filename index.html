@@ -56,6 +56,9 @@
                                 <div id="err_login"></div>
                             </div>
                         </div>
+                        <div id="login_loading" hidden>
+                            <img class="center-block" src="loading.gif">
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -91,6 +94,9 @@
                             <div class="col-sm-10 col-sm-offset-1">
                                 <div id="err_upload"></div>
                             </div>
+                        </div>
+                        <div id="upload_loading" hidden>
+                            <img class="center-block" src="loading.gif">
                         </div>
                     </form>
                 </div>
@@ -169,6 +175,9 @@
                         <div class="form-group">
                             <div id="err_publish"></div>
                         </div>
+                        <div id="publish_loading" hidden>
+                            <img class="center-block" src="loading.gif">
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -218,12 +227,20 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label for="index_cnt" class="col-sm-2 control-label">文章数</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="index_cnt" placeholder="首页显示文章数量"></div>
+                        </div>
+                        <div class="form-group">
                             <label for="index_disqus" class="col-sm-2 control-label">评论</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="index_disqus" placeholder="disqus account name"></div>
                         </div>
                         <div class="form-group">
                             <div id="err_setting"></div>
+                        </div>
+                        <div id="setting_loading" hidden>
+                            <img class="center-block" src="loading.gif">
                         </div>
                     </form>
                 </div>
@@ -247,6 +264,9 @@
                     <div id="err_list"></div>
                 </div>
                 <div class="modal-body">
+                    <div id="list_loading" hidden>
+                        <img class="center-block" src="loading.gif">
+                    </div>
                     <ul class="list-group" id="paper_list"></ul>
                 </div>
             </div>
@@ -307,7 +327,7 @@
     <script src="//cdn.bootcss.com/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap-fileinput/4.2.8/js/fileinput.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap-fileinput/4.2.8/js/fileinput_locale_zh.min.js"></script>
-    <script src="github.js"></script>
+    <script src="github.bundle.min.js"></script>
     <script src="paper.js"></script>
 </body>
 </html>

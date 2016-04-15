@@ -34,7 +34,7 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<p class="text-center"><a href="/archive.html">ARCHIVE</a> | <a href="http://zhoukk.com/paper/" target="_blank">PAPER</a></p>
+					<p class="text-center"><a href="archive.html">ARCHIVE</a> | <a href="http://zhoukk.com/paper/" target="_blank">PAPER</a></p>
 				</div>
 			</div>
 		</div>
