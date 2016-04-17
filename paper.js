@@ -532,6 +532,20 @@ $('#btn_publish').click(function() {
         meta.url = meta.url + '.html'
     }
 
+
+    var reset_publish = function() {
+        $('#paper_title').val('')
+        $('#paper_url').val('')
+        $('#paper_keywords').val('')
+        $('#paper_description').val('')
+        $('#paper_datetime').val('')
+        $('#editor').val('')
+        $('#preview').html('')
+        $('#dialog_publish').modal('hide')
+        autosize.update($('textarea'))
+    }
+
+
     $(this).attr('disabled', 'disabled')
     $('#publish_loading').show()
     create_paper(meta, function(err) {
@@ -539,6 +553,12 @@ $('#btn_publish').click(function() {
             $('#btn_publish').removeAttr('disabled')
             $('#publish_loading').hide()
             return show_error('err_publish', err)
+        }
+        if (meta.mode == 'draft') {
+            $('#btn_publish').removeAttr('disabled')
+            $('#publish_loading').hide()
+            reset_publish()
+            return
         }
         while (config.list.length >= config.index_cnt) {
             config.list.pop()
@@ -556,15 +576,7 @@ $('#btn_publish').click(function() {
                 if (err) {
                     return show_error('err_publish', err)
                 }
-                $('#paper_title').val('')
-                $('#paper_url').val('')
-                $('#paper_keywords').val('')
-                $('#paper_description').val('')
-                $('#paper_datetime').val('')
-                $('#editor').val('')
-                $('#preview').html('')
-                $('#dialog_publish').modal('hide')
-                autosize.update($('textarea'))
+                reset_publish()
             })
         })
     })
