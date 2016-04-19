@@ -263,7 +263,7 @@ $('#dialog_list').on('show.bs.modal',function() {
 })
 
 $('#dialog_help').on('show.bs.modal',function() {
-    $.get('/README.md', function(data) {
+    $.get('README.md', function(data) {
         $('#help').html(marked(data))
     })
 })
@@ -433,7 +433,7 @@ function update_archive(meta, f) {
     }
     readfile('archive.html', function(err, data) {
         if (err) {
-            $.get('/archive.tpl', function(data) {
+            $.get('archive.tpl', function(data) {
                 ff(data)
             })
         } else {
@@ -443,7 +443,7 @@ function update_archive(meta, f) {
 }
 
 function update_index(f) {
-    $.get('/index.tpl', function(data) {
+    $.get('index.tpl', function(data) {
         var body = ''
         $(config.list).each(function(i, v) {
             body = body + '<a href="' + v.url + '" class="list-group-item">' + v.title + '</a>\n'
@@ -465,7 +465,7 @@ function update_index(f) {
 
 function create_paper(meta, f) {
     var content = marked(meta.md)
-    $.get('/paper.tpl', function(data) {
+    $.get('paper.tpl', function(data) {
         data = data.replace(/{{body}}/, content)
         .replace(/{{title}}/, meta.title)
         .replace(/{{author}}/, config.author)
